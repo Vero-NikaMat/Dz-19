@@ -38,21 +38,6 @@ def create_data(app, db):
             db.session.add_all([u1, u2, u3])
 
 
-def auth_required(func):
-    def wrapper(algo=None, *args, **kwargs):
-        if 'Authorization' not in request.headers:
-            abort(401)
-        data = request.headers['Authorization']
-        token = data.split("Bearer ")[-1]
-        try:
-            jwt.decode(token, app.config['SECRET_HERE'], algorithms=[algo])
-        except Exception as e:
-            print(f"Traceback: {e}")
-            abort(401)
-        return func(*args, **kwargs)
-    return wrapper
-
-
 
 
 def get_hash(self):

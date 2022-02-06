@@ -1,10 +1,11 @@
 from flask import request
 from flask_restx import Resource, Namespace
 
-from helpers import auth_required
 from implemented import user_service
 
-from models import User, UserSchema
+from app.dao.models import User, UserSchema
+
+from app.helpers.decorators import admin_required
 from setup_db import db
 
 user_ns = Namespace('users')
@@ -25,7 +26,7 @@ class UsersView(Resource):
 
 @user_ns.route('/<int:uid>')
 class UserView(Resource):
-    @auth_required
+    @admin_required
     def delete(self, uid):
         user_service.delete(uid)
         return "", 204
