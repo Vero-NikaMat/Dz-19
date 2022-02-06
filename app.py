@@ -1,11 +1,13 @@
-from flask import Flask
-from flask_restx import Api
+from flask import Flask, request
+from flask_restx import Api, abort
+import jwt
 
 from config import Config
+from app.dao.models import User
 from setup_db import db
-from views.directors import director_ns
-from views.genres import genre_ns
-from views.movies import movie_ns
+from app.views.directors import director_ns
+from app.views.genres import genre_ns
+from app.views.movies import movie_ns
 
 
 def create_app(config_object):
@@ -22,6 +24,38 @@ def register_extensions(app):
     api.add_namespace(genre_ns)
     api.add_namespace(movie_ns)
 
+
+def create_data(app, db):
+    with app.app_context():
+        db.create_all()
+
+        u1 = User(username="vasya", password="my_little_pony", role="user")
+        u2 = User(username="oleg", password="qwerty", role="user")
+        u3 = User(username="oleg", password="P@ssw0rd", role="admin")
+
+        with db.session.begin():
+            db.session.add_all([u1, u2, u3])
+
+
+def auth_required(func):
+    def wrapper(*args, **kwargs):
+        if 'Authorization' not in request.headers:
+            abort(401)
+        data = request.headers['Authorization']
+        token = data.split("Bearer ")[-1]
+        try:
+            jwt.decode(token, app.config['SECRET_HERE'], algorithms=[algo])
+        except Exception as e:
+            print(f"Traceback: {e}")
+            abort(401)
+        return func(*args, **kwargs)
+    return wrapper
+
+
+
+
+def get_hash(self):
+    return hashlib.md5(self.password.encode('utf-8')).hexdigest()
 
 app = create_app(Config())
 app.debug = True
