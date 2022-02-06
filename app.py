@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_restx import Api, abort
 import jwt
+import hashlib
 
 from config import Config
 from app.dao.models import User
@@ -38,7 +39,7 @@ def create_data(app, db):
 
 
 def auth_required(func):
-    def wrapper(*args, **kwargs):
+    def wrapper(algo=None, *args, **kwargs):
         if 'Authorization' not in request.headers:
             abort(401)
         data = request.headers['Authorization']
