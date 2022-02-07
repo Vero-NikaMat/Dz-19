@@ -1,6 +1,5 @@
 from flask import Flask, request
 from flask_restx import Api, abort
-import jwt
 import hashlib
 
 from config import Config
